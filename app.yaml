@@ -1,0 +1,8 @@
+runtime: python39
+
+instance_class: F2
+
+manual_scaling:
+  instances: 1
+
+entrypoint: source .env && python3 src/main.py
