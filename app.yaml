@@ -1,6 +1,0 @@
-runtime: python39
-
-manual_scaling:
-  instances: 1
-
-entrypoint: python3 src/main.py

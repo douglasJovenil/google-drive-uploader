@@ -8,6 +8,7 @@ discord = "*"
 environ-config = "*"
 requests = "*"
 google-api-python-client = "*"
+oauth2client = "*"
 
 [dev-packages]
 

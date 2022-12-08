@@ -1,0 +1,7 @@
+*/client_secrets.json
+.env.example
+.gitignore
+.env
+docker-compose
+Dockerfile
+README
