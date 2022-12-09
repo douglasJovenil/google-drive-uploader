@@ -9,6 +9,7 @@ environ-config = "*"
 requests = "*"
 google-api-python-client = "*"
 oauth2client = "*"
+akeyless = "*"
 
 [dev-packages]
 

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "64723b0f79fa7ff6554a4065c051c846e72c028b96e5f66c4776d2041509ca6a"
+            "sha256": "80ffa3e510b86e62ce473132d759b4002b240d2381f4c6ea2167778ebfd391a6"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -116,6 +116,14 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==1.3.1"
+        },
+        "akeyless": {
+            "hashes": [
+                "sha256:21c343da94c91a43aec9b1dfbef53ce5ab19e07a10ed2c11f14dbbb7d2e33289",
+                "sha256:4806af33c093feecdae2a74662fe9866a20963d27eaa671277ad6c0e69f76922"
+            ],
+            "index": "pypi",
+            "version": "==3.0.1"
         },
         "async-timeout": {
             "hashes": [
@@ -467,6 +475,14 @@
             ],
             "markers": "python_version >= '3.1'",
             "version": "==3.0.9"
+        },
+        "python-dateutil": {
+            "hashes": [
+                "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86",
+                "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"
+            ],
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+            "version": "==2.8.2"
         },
         "requests": {
             "hashes": [

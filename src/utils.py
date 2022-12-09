@@ -15,4 +15,3 @@ def open_file(filename):
 
   finally:
     file.close()
-

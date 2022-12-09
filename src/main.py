@@ -17,6 +17,7 @@ import requests
 
 from utils import open_file
 from config import CONFIG
+from config import PATH
 import twitch
 
 
@@ -28,9 +29,9 @@ discord = Bot(command_prefix='!', intents=intents)
 
 
 @discord.event
-async def on_ready():
-  with open_file(CONFIG.GOOGLE_CLIENT_SECRETS_FILENAME) as file:
-    file.write(CONFIG.GOOGLE_DRIVE_AUTHENTICATION)
+async def on_guild_join(_):
+  with open_file(f'{PATH.SOURCE}/{CONFIG.GOOGLE_CLIENT_SECRETS_FILENAME}') as file:
+    file.write(repr(CONFIG.GOOGLE_DRIVE_AUTHENTICATION)[1:-1])
 
   for guild in discord.guilds:
     channel_names = [
@@ -56,11 +57,11 @@ async def on_message(message: Message):
     if matches:
       slug = matches.group(1)
       await message.channel.send(f'Processing clip: {slug}')
-      output_filename = f'{slug}.mp4'
 
+      output_filename = f'{slug}.mp4'
       url = twitch.get_download_url(slug)
       video = requests.get(url).content
-      creds = ServiceAccountCredentials.from_json_keyfile_name(CONFIG.GOOGLE_CLIENT_SECRETS_FILENAME, ['https://www.googleapis.com/auth/drive.file'])
+      creds = ServiceAccountCredentials.from_json_keyfile_name(f'{PATH.SOURCE}/{CONFIG.GOOGLE_CLIENT_SECRETS_FILENAME}', ['https://www.googleapis.com/auth/drive.file'])
       service = build('drive', 'v3', credentials=creds)
 
       with open(output_filename, 'wb') as output:
@@ -73,14 +74,18 @@ async def on_message(message: Message):
       Timer(1, lambda: remove(output_filename)).start()
 
   await discord.process_commands(message)
-      
 
 
 @discord.command(help='Never run this command, it can cause emotional damage!!!')
 async def jovenil(ctx: Context):
-  await ctx.send(file=File(r'../resources/easter_egg.mp3'))
+  await ctx.send(file=File(f'{PATH.RESOURCES}/easter_egg.mp3'))
 
-  
+
+@discord.command(help='Shows the current folder ID of Google Drive')
+async def current(ctx: Context):
+  await ctx.send(f'Your current folder is: {CONFIG.GOOGLE_DRIVE_CURRENT_FOLDER_URL}')
+
+
 @discord.command(
   help='Updates the folder ID to save the files in Google Drive.',
   description='''You can get the ID accessing the folder using your browser and get it from the URL.
@@ -95,13 +100,6 @@ async def update(ctx: Context):
   folder_id = ctx.message.content.replace('!update', '').strip()
   CONFIG.GOOGLE_DRIVE_FOLDER_ID = folder_id
   await ctx.send(f'Folder updated with Success! You can access it here: {CONFIG.GOOGLE_DRIVE_CURRENT_FOLDER_URL}')
-
-
-@discord.command(
-  help='Shows the current folder ID of Google Drive'
-)
-async def current(ctx: Context):
-  await ctx.send(f'Your current folder is: {CONFIG.GOOGLE_DRIVE_CURRENT_FOLDER_URL}')
 
 
 if __name__ == '__main__':
