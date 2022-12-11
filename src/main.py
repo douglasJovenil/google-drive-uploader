@@ -14,7 +14,7 @@ from googleapiclient.http import MediaFileUpload
 from googleapiclient.discovery import build
 import requests
 
-from utils import delete_file_threaded
+from utils import delete_file
 from utils import create_discord_bot
 from config import CONFIG
 from config import PATH
@@ -72,8 +72,9 @@ async def on_message(message: Message):
         fields='id'
       ).execute()['id']
 
-      delete_file_threaded(output_filename)
       await message.channel.send(f'Upload successed! You can access it here: https://drive.google.com/file/d/{file_id}/view')
+
+      discord.loop.run_in_executor(None, lambda: delete_file(output_filename))
   
   await discord.process_commands(message)
 
