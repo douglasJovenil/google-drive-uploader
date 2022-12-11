@@ -1,12 +1,16 @@
-FROM python:3.10
+FROM python:3-alpine3.10
 
 WORKDIR /app
 
 COPY . .
 
-RUN apt-get update -y
-RUN pip install pipenv pipfile-requirements
-RUN pipfile2req > requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir pipenv pipfile-requirements && \
+    pipfile2req > requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt -U --target /app/site-packages && \
+    pip uninstall pipenv pipfile-requirements -y && \
+    rm Pipfile Pipfile.lock requirements.txt
+
+ENV PYTHONPATH /app/site-packages
 
 CMD python src/main.py

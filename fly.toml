@@ -1,4 +1,4 @@
-# fly.toml file generated for google-drive-uploader on 2022-12-08T21:14:16-03:00
+# fly.toml file generated for google-drive-uploader on 2022-12-10T21:50:00-03:00
 
 app = "google-drive-uploader"
 kill_signal = "SIGINT"

@@ -1,52 +1,52 @@
-from threading import Timer
+from json import loads
+from uuid import uuid4
 from re import search
-from os import remove
 
+from oauth2client.service_account import ServiceAccountCredentials
 from discord.ext.commands.context import Context
-from discord.ext.commands.bot import Bot
 from discord import PermissionOverwrite
 from discord.channel import TextChannel
 from discord.message import Message
-from discord import Intents 
+from discord.guild import Guild
 from discord import File
 from discord.utils import get
-from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.discovery import build
 import requests
 
-from utils import open_file
+from utils import delete_file_threaded
+from utils import create_discord_bot
 from config import CONFIG
 from config import PATH
 import twitch
 
 
 
-intents = Intents.default()
-intents.message_content = True
-discord = Bot(command_prefix='!', intents=intents)
-
+discord = create_discord_bot()
+google_drive_service = build(
+  'drive', 
+  'v3', 
+  credentials=ServiceAccountCredentials.from_json_keyfile_dict(loads(CONFIG.GOOGLE_DRIVE_AUTHENTICATION))
+)
 
 
 @discord.event
-async def on_guild_join(_):
-  with open_file(f'{PATH.SOURCE}/{CONFIG.GOOGLE_CLIENT_SECRETS_FILENAME}') as file:
-    file.write(repr(CONFIG.GOOGLE_DRIVE_AUTHENTICATION)[1:-1])
-
+async def on_guild_join(guild: Guild):
   for guild in discord.guilds:
-    channel_names = [
+    channel_names = (
       channel.name
       for channel 
       in guild.channels 
       if isinstance(channel, TextChannel)
-    ]
+    )
+
+    overwrites = {
+      guild.default_role: PermissionOverwrite(read_messages=False),
+      guild.me: PermissionOverwrite(read_messages=True),
+    }
+    category = get(guild.categories, name=CONFIG.DISCORD_CATEGORY_NAME)
 
     if CONFIG.DISCORD_CHANNEL_NAME not in channel_names:
-      overwrites = {
-        guild.default_role: PermissionOverwrite(read_messages=False),
-        guild.me: PermissionOverwrite(read_messages=True),
-      }
-      category = get(guild.categories, name=CONFIG.DISCORD_CATEGORY_NAME)
       await guild.create_text_channel(CONFIG.DISCORD_CHANNEL_NAME, overwrites=overwrites, category=category)
 
 
@@ -58,23 +58,24 @@ async def on_message(message: Message):
       slug = matches.group(1)
       await message.channel.send(f'Processing clip: {slug}')
 
-      output_filename = f'{slug}.mp4'
+      output_filename = f'{slug}-{uuid4()}.mp4'
       url = twitch.get_download_url(slug)
-      video = requests.get(url).content
-      creds = ServiceAccountCredentials.from_json_keyfile_name(f'{PATH.SOURCE}/{CONFIG.GOOGLE_CLIENT_SECRETS_FILENAME}', ['https://www.googleapis.com/auth/drive.file'])
-      service = build('drive', 'v3', credentials=creds)
 
       with open(output_filename, 'wb') as output:
-        output.write(video)
-        file_metadata = {'name': output_filename, 'parents': [CONFIG.GOOGLE_DRIVE_FOLDER_ID]}
-        media = MediaFileUpload(output_filename, mimetype='video/mp4')
-        file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+        output.write(requests.get(url).content)
 
-      await message.channel.send(f'Upload successed! You can access it here: https://drive.google.com/file/d/{file["id"]}/view')
-      Timer(1, lambda: remove(output_filename)).start()
+      file_metadata = {'name': f'{slug}.mp4', 'parents': [CONFIG.GOOGLE_DRIVE_FOLDER_ID]}
+      media = MediaFileUpload(output_filename, mimetype='video/mp4')
+      file_id = google_drive_service.files().create(
+        body=file_metadata, 
+        media_body=media, 
+        fields='id'
+      ).execute()['id']
 
+      delete_file_threaded(output_filename)
+      await message.channel.send(f'Upload successed! You can access it here: https://drive.google.com/file/d/{file_id}/view')
+  
   await discord.process_commands(message)
-
 
 @discord.command(help='Never run this command, it can cause emotional damage!!!')
 async def jovenil(ctx: Context):

@@ -16,6 +16,7 @@ class Akeyless:
   AKEYLESS_CLIENT_ID: str = var()
   AKEYLESS_ACCESS_KEY: str = var()
 
+
 class Config:
   # All this keys are acquired from Akeyless
   # In the Akeyless platform they start with prefix "APP_"
@@ -30,13 +31,13 @@ class Config:
   @property
   def GOOGLE_DRIVE_CURRENT_FOLDER_URL(self) -> str:
     return f'https://drive.google.com/drive/folders/{self.GOOGLE_DRIVE_FOLDER_ID}'
-
+  
   def __init__(self):
     AKEYLESS: Akeyless = Akeyless.from_environ()
     members = getmembers(self, lambda attr: not(isroutine(attr)))
-    attrs_as_dict: dict = members[0][1]
+    attrs_as_dict: dict = next(member for member in members if member[0] == '__annotations__')[1]
     attrs = [ f'APP_{key}' for key in attrs_as_dict.keys() ]
-
+  
     configuration = Configuration(host='https://api.akeyless.io')
     api_client = ApiClient(configuration)
     api = V2Api(api_client)
@@ -50,7 +51,10 @@ class Config:
       attr = key.replace('APP_', '')
       setattr(self, attr, value)
 
+
 class PATH:
+  __slots__ = ()
+
   ROOT = Path(__file__).resolve().parent.parent
   SOURCE = f'{ROOT}/src'
   RESOURCES = f'{ROOT}/resources'

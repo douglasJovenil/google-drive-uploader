@@ -1,7 +1,10 @@
-*/client_secrets.json
 .env.example
 .gitignore
 .env
-docker-compose
+docker-compose.yaml
 Dockerfile
-README
+README.md
+fly.toml
+*/__pycache__
+.git
+.dockerignore 

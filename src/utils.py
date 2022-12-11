@@ -1,17 +1,23 @@
-from contextlib import contextmanager
+from discord.ext.commands.bot import Bot
+from discord import Intents 
+from os import remove
+from os.path import exists
+from threading import Timer
 
 
-@contextmanager
-def open_file(filename):
-  with open(filename, 'w'): 
-    ...
+def create_discord_bot() -> Bot:
+  intents = Intents.default()
+  intents.message_content = True
+  intents.auto_moderation = True
+  return Bot(command_prefix='!', intents=intents)
 
+def delete_file(path: str): 
   try:
-    file = open(filename, 'r+')
-  except Exception as e:
-    print(e)
-  else:
-    yield file
+    remove(path)
+  except PermissionError:
+    print(f'Cannot delete {path} is being used by another process.')
+  except FileNotFoundError:
+    print(f'File {path} already been deleted.')
 
-  finally:
-    file.close()
+def delete_file_threaded(path: str):
+  Timer(30, lambda: delete_file(path)).start()

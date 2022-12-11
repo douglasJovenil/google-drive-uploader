@@ -3,16 +3,6 @@ from urllib import parse
 import requests
 
 
-class ConsoleError(Exception):
-  """Raised when an error occurs and script exectuion should halt."""
-  pass
-
-
-class GQLError(Exception):
-  def __init__(self, errors):
-    super().__init__("GraphQL query failed")
-    self.errors = errors
-
 
 def authenticated_post(url, data=None, json=None, headers={}):
   headers['Client-ID'] = CONFIG.TWITCH_CLIENT_ID
@@ -20,7 +10,7 @@ def authenticated_post(url, data=None, json=None, headers={}):
   response = requests.post(url, data=data, json=json, headers=headers)
   if response.status_code == 400:
     data = response.json()
-    raise ConsoleError(data["message"])
+    raise Exception(data["message"])
 
   response.raise_for_status()
 
@@ -32,7 +22,7 @@ def gql_post(query):
   response = authenticated_post(url, data=query).json()
 
   if "errors" in response:
-    raise GQLError(response["errors"])
+    raise Exception(response["errors"])
 
   return response
 
