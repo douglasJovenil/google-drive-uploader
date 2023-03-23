@@ -7,11 +7,15 @@ name = "pypi"
 discord = "*"
 environ-config = "*"
 requests = "*"
-google-api-python-client = "*"
 oauth2client = "*"
 akeyless = "*"
+google-api-python-client = "==1.8.0"
 
 [dev-packages]
+pyinstaller = "*"
 
 [requires]
 python_version = "3.10"
+
+[scripts]
+compile = "python scripts/compile.py"
